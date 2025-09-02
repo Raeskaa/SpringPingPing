@@ -600,6 +600,7 @@ async function populateTextFields(frame, profile) {
 async function populateImageField(frame, imageUrl, processingMode) {
     try {
         console.log('Processing image URL:', imageUrl);
+        console.log('Processing mode:', processingMode); // Debug: see what mode is received
         
         // Check cache first
         let imageHash = imageCache.get(imageUrl);
@@ -620,13 +621,15 @@ async function populateImageField(frame, imageUrl, processingMode) {
             let processedImageData = uint8Array;
             if (processingMode === 'remove-background') {
                 try {
-                    console.log('Removing background from image...');
+                    console.log('🔄 Background removal enabled - processing image...');
                     processedImageData = await removeBackgroundFromImage(uint8Array);
-                    console.log('Background removal completed');
+                    console.log('✅ Background removal completed successfully');
                 } catch (bgError) {
-                    console.warn('Background removal failed, using original image:', bgError.message);
+                    console.warn('⚠️ Background removal failed, using original image:', bgError.message);
                     processedImageData = uint8Array;
                 }
+            } else {
+                console.log('ℹ️ Background removal not enabled, using original image');
             }
             
             // Create Figma image
@@ -686,13 +689,21 @@ async function populateImageField(frame, imageUrl, processingMode) {
 // Background removal function using free API service
 async function removeBackgroundFromImage(imageBuffer) {
     try {
+        console.log('🔄 Starting background removal process...');
+        console.log('📊 Image buffer size:', imageBuffer.byteLength, 'bytes');
+        
         // Convert ArrayBuffer to base64
         const base64Image = arrayBufferToBase64(imageBuffer);
+        console.log('🔄 Image converted to base64, length:', base64Image.length);
         
         // Use remove.bg API (free tier: 50 images/month)
-        const apiKey = 'HZrvxg1Gn6cbffNKBTXMckJ1'; // You'll need to get a free API key from remove.bg
+        const apiKey = 'HZrvxg1Gn6cbffNKBTXMckJ1';
+        console.log('🔑 Using API key:', apiKey.substring(0, 8) + '...');
         
-        const response = await fetch('https://api.remove.bg/v1.0/removebg', {
+        const apiUrl = 'https://api.remove.bg/v1.0/removebg';
+        console.log('🌐 Calling API:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'X-Api-Key': apiKey,
@@ -705,22 +716,29 @@ async function removeBackgroundFromImage(imageBuffer) {
             })
         });
         
+        console.log('📡 API response status:', response.status);
+        console.log('📡 API response headers:', Object.fromEntries(response.headers.entries()));
+        
         if (!response.ok) {
-            throw new Error(`Background removal API failed: ${response.status}`);
+            const errorText = await response.text();
+            console.error('❌ API error response:', errorText);
+            throw new Error(`Background removal API failed: ${response.status} - ${errorText}`);
         }
         
         const processedImageBuffer = await response.arrayBuffer();
+        console.log('✅ Received processed image, size:', processedImageBuffer.byteLength, 'bytes');
+        
         return new Uint8Array(processedImageBuffer);
         
     } catch (error) {
-        console.error('Background removal failed:', error);
+        console.error('❌ Background removal failed:', error);
         
         // Fallback: Try alternative free service (remove.bg alternative)
         try {
-            console.log('Trying alternative background removal service...');
+            console.log('🔄 Trying alternative background removal service...');
             return await removeBackgroundAlternative(imageBuffer);
         } catch (fallbackError) {
-            console.error('Alternative background removal also failed:', fallbackError);
+            console.error('❌ Alternative background removal also failed:', fallbackError);
             throw new Error('Background removal unavailable');
         }
     }

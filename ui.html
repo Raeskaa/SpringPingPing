@@ -1064,6 +1064,10 @@
           }
         }, '*');
         
+        // Debug: log what's being sent
+        console.log('🔍 Debug: Sending settings to plugin:', settings);
+        console.log('🔍 Debug: Image processing value:', document.getElementById('imageProcessing').value);
+        
         // Update UI for processing state
         processBtn.disabled = true;
         processBtn.textContent = 'Processing...';
