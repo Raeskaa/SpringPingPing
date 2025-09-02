@@ -596,7 +596,7 @@ async function populateTextFields(frame, profile) {
     }
 }
 
-// Populate image field with URL (for Google Sheets)
+// Populate image field with URL (for Google Sheets) - with background removal
 async function populateImageField(frame, imageUrl, processingMode) {
     try {
         console.log('Processing image URL:', imageUrl);
@@ -616,8 +616,21 @@ async function populateImageField(frame, imageUrl, processingMode) {
                 return;
             }
             
+            // Apply background removal if enabled
+            let processedImageData = uint8Array;
+            if (processingMode === 'remove-background') {
+                try {
+                    console.log('Removing background from image...');
+                    processedImageData = await removeBackgroundFromImage(uint8Array);
+                    console.log('Background removal completed');
+                } catch (bgError) {
+                    console.warn('Background removal failed, using original image:', bgError.message);
+                    processedImageData = uint8Array;
+                }
+            }
+            
             // Create Figma image
-            const image = figma.createImage(uint8Array);
+            const image = figma.createImage(processedImageData);
             imageHash = image.hash;
             
             // Cache for future use (limit cache size)
@@ -668,6 +681,95 @@ async function populateImageField(frame, imageUrl, processingMode) {
         console.warn('Error populating image:', error);
         // Continue without image rather than failing
     }
+}
+
+// Background removal function using free API service
+async function removeBackgroundFromImage(imageBuffer) {
+    try {
+        // Convert ArrayBuffer to base64
+        const base64Image = arrayBufferToBase64(imageBuffer);
+        
+        // Use remove.bg API (free tier: 50 images/month)
+        const apiKey = 'HZrvxg1Gn6cbffNKBTXMckJ1'; // You'll need to get a free API key from remove.bg
+        
+        const response = await fetch('https://api.remove.bg/v1.0/removebg', {
+            method: 'POST',
+            headers: {
+                'X-Api-Key': apiKey,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                image_url: null,
+                image_base64: base64Image,
+                size: 'auto'
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Background removal API failed: ${response.status}`);
+        }
+        
+        const processedImageBuffer = await response.arrayBuffer();
+        return new Uint8Array(processedImageBuffer);
+        
+    } catch (error) {
+        console.error('Background removal failed:', error);
+        
+        // Fallback: Try alternative free service (remove.bg alternative)
+        try {
+            console.log('Trying alternative background removal service...');
+            return await removeBackgroundAlternative(imageBuffer);
+        } catch (fallbackError) {
+            console.error('Alternative background removal also failed:', fallbackError);
+            throw new Error('Background removal unavailable');
+        }
+    }
+}
+
+// Alternative background removal using different free service
+async function removeBackgroundAlternative(imageBuffer) {
+    try {
+        // Convert to base64
+        const base64Image = arrayBufferToBase64(imageBuffer);
+        
+        // Use alternative service (example: Cloudinary with background removal)
+        const response = await fetch('https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                file: `data:image/jpeg;base64,${base64Image}`,
+                upload_preset: 'YOUR_UPLOAD_PRESET',
+                transformation: 'e_bgremoval'
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Alternative service failed: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        const processedImageUrl = result.secure_url;
+        
+        // Download the processed image
+        const imageResponse = await fetch(processedImageUrl);
+        const processedImageBuffer = await imageResponse.arrayBuffer();
+        return new Uint8Array(processedImageBuffer);
+        
+    } catch (error) {
+        throw new Error(`Alternative background removal failed: ${error.message}`);
+    }
+}
+
+// Utility function to convert ArrayBuffer to base64
+function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
 }
 
 // Utility function to chunk arrays for batch processing

@@ -24,9 +24,12 @@
         "https://*.hscicdn.com",
         "https://*.google.com",
         "https://google.com",
+        "https://api.remove.bg",
+        "https://api.cloudinary.com",
+        "https://*.cloudinary.com",
         "*"
       ],
-      "reasoning": "This plugin needs access to Google Sheets and various external domains to fetch LinkedIn profile data and images for populating Figma templates. The wildcard access is required to handle different Google Sheets URLs and external image sources."
+      "reasoning": "This plugin needs access to Google Sheets and various external domains to fetch LinkedIn profile data and images for populating Figma templates. The wildcard access is required to handle different Google Sheets URLs, external image sources, and background removal APIs."
     },
     "documentAccess": "dynamic-page"
   }

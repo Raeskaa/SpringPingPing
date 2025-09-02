@@ -649,6 +649,35 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+
+    .setting-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 14px;
+      transition: border-color 0.2s ease;
+    }
+    
+    .setting-group select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    
+    .setting-group small {
+      display: block;
+      margin-top: 4px;
+      color: var(--text-tertiary);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+    
+    .setting-help {
+      color: var(--text-secondary);
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -741,7 +770,9 @@
         <select id="imageProcessing">
           <option value="optimize">Optimize for performance</option>
           <option value="original" selected>Keep original quality</option>
+          <option value="remove-background">Remove background automatically</option>
         </select>
+        <small class="setting-help">Background removal uses AI to automatically remove image backgrounds</small>
       </div>
 
       <div class="setting-group">
