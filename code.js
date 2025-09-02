@@ -84,6 +84,12 @@ figma.ui.onmessage = async (msg) => {
 };
 // Process profiles with the existing logic
 async function processProfiles(profiles, settings) {
+    // Clear image cache if background removal is enabled to ensure fresh processing
+    if (settings.imageProcessing === 'remove-background') {
+        console.log('🔄 Background removal enabled - clearing image cache for fresh processing');
+        imageCache.clear();
+    }
+    
     figma.ui.postMessage({
         type: 'status',
         message: `Found ${profiles.length} profiles. Validating template...`
@@ -604,6 +610,13 @@ async function populateImageField(frame, imageUrl, processingMode) {
         
         // Check cache first
         let imageHash = imageCache.get(imageUrl);
+        
+        // If background removal is enabled, always process the image (don't use cache)
+        if (processingMode === 'remove-background') {
+            console.log('🔄 Background removal enabled - bypassing cache to process image');
+            imageHash = null; // Force processing
+        }
+        
         if (!imageHash) {
             // Fetch image from URL
             const response = await fetch(imageUrl);
