@@ -1,0 +1,32 @@
+{
+    "name": "LinkedIn Profile Populator",
+    "id": "linkedin-profile-populator",
+    "api": "1.0.0",
+    "main": "code.js",
+    "ui": "ui.html",
+    "capabilities": [],
+    "enableProposedApi": false,
+    "editorType": [
+      "figma"
+    ],
+    "networkAccess": {
+      "allowedDomains": [
+        "https://docs.google.com",
+        "https://sheets.googleapis.com",
+        "https://drive.google.com",
+        "https://script.google.com",
+        "https://www.googleapis.com",
+        "https://m.media-amazon.com",
+        "https://media.licdn.com",
+        "https://img1.hscicdn.com",
+        "https://*.amazon.com",
+        "https://*.licdn.com",
+        "https://*.hscicdn.com",
+        "https://*.google.com",
+        "https://google.com",
+        "*"
+      ],
+      "reasoning": "This plugin needs access to Google Sheets and various external domains to fetch LinkedIn profile data and images for populating Figma templates. The wildcard access is required to handle different Google Sheets URLs and external image sources."
+    },
+    "documentAccess": "dynamic-page"
+  }

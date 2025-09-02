@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>LinkedIn Profile Populator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary-color: #0828CC;
+      --primary-hover: #071f9e;
+      --primary-light: #e8ecff;
+      --success-color: #10b981;
+      --success-light: #d1fae5;
+      --warning-color: #f59e0b;
+      --warning-light: #fef3c7;
+      --error-color: #ef4444;
+      --error-light: #fee2e2;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --text-tertiary: #9ca3af;
+      --border-color: #e5e7eb;
+      --border-light: #f3f4f6;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f9fafb;
+      --bg-tertiary: #f3f4f6;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] {
+      --text-primary: #f9fafb;
+      --text-secondary: #d1d5db;
+      --text-tertiary: #9ca3af;
+      --border-color: #374151;
+      --border-light: #4b5563;
+      --bg-primary: #111827;
+      --bg-secondary: #1f2937;
+      --bg-tertiary: #374151;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    }
+
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 0;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.5;
+      transition: all 0.3s ease;
+    }
+
+    .container {
+      max-width: 100%;
+      padding: 20px;
+    }
+
+    .header {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .plugin-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      padding: 4px;
+    }
+
+    .plugin-logo svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .logo-text h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .logo-text p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+
+    .theme-toggle {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .theme-toggle .sun-icon {
+      display: block;
+    }
+
+    .theme-toggle .moon-icon {
+      display: none;
+    }
+
+    [data-theme="dark"] .theme-toggle .sun-icon {
+      display: none;
+    }
+
+    [data-theme="dark"] .theme-toggle .moon-icon {
+      display: block;
+    }
+
+    .upload-section {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .upload-area {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 32px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--bg-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-area:hover, .upload-area.dragover { 
+      border-color: var(--primary-color);
+      background: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .upload-area::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--primary-light) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .upload-area:hover::before {
+      opacity: 0.1;
+    }
+
+    .upload-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    .upload-area h3 {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .upload-area p {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .upload-area small {
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+
+    .settings {
+      background: var(--bg-secondary);
+      margin: 16px 0;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .settings-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-title::before {
+      content: '⚙️';
+      font-size: 16px;
+    }
+
+    .setting-group {
+      margin-bottom: 12px;
+    }
+
+    .setting-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 12px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      transition: all 0.2s ease;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    select:hover {
+      border-color: var(--primary-color);
+    }
+
+    select option {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 8px;
+    }
+
+    .process-btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .process-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .process-btn:hover::before {
+      left: 100%;
+    }
+
+    .process-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .process-btn:disabled {
+      background: var(--bg-tertiary);
+      color: var(--text-tertiary);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .process-btn:disabled::before {
+      display: none;
+    }
+
+    .progress-section {
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      display: none;
+      margin-top: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-color);
+      transition: width 0.3s ease;
+      border-radius: 6px;
+    }
+
+    .progress-text {
+      text-align: center;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .progress-details {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .status {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 10px;
+      font-weight: 500;
+      text-align: center;
+      font-size: 13px;
+      display: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .status.success {
+      background: var(--success-light);
+      color: var(--success-color);
+      border: 1px solid var(--success-color);
+    }
+
+    .status.error {
+      background: var(--error-light);
+      color: var(--error-color);
+      border: 1px solid var(--error-color);
+    }
+
+    .status.info {
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .tips {
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary-color);
+      margin-top: 20px;
+      font-size: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tips-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .tips ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tips li {
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      position: relative;
+      padding-left: 16px;
+      line-height: 1.5;
+    }
+
+    .tips li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+
+    .file-info {
+      background: var(--success-light);
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--success-color);
+      margin-top: 16px;
+      display: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .file-info-title {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--success-color);
+      margin-bottom: 8px;
+    }
+
+    .file-info-details {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+    
+    /* Tab Styles */
+    .input-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      padding: 4px;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border-radius: 6px;
+      position: relative;
+    }
+    
+    .tab-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+    
+    .tab-btn.active {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Google Sheets Input Styles */
+    .sheets-input-area {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 32px 24px;
+      text-align: center;
+      background: var(--bg-primary);
+      transition: all 0.3s ease;
+    }
+    
+    .sheets-input-area:hover {
+      border-color: var(--primary-color);
+      background: var(--primary-light);
+    }
+    
+    .sheets-input-area h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    
+    .sheets-input-area p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+    
+    .sheets-input-area small {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-bottom: 20px;
+      display: block;
+      line-height: 1.4;
+    }
+    
+    .sheets-input-area input[type="url"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 12px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+      transition: all 0.2s ease;
+    }
+    
+    .sheets-input-area input[type="url"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px var(--primary-light);
+      transform: translateY(-1px);
+    }
+    
+    .sheets-input-area input[type="url"]:hover {
+      border-color: var(--primary-color);
+    }
+    
+    .validate-btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .validate-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .validate-btn:disabled {
+      background: var(--bg-tertiary);
+      color: var(--text-tertiary);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .validate-btn, .test-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+    }
+    
+    .validate-btn {
+      background: var(--primary-color);
+      color: white;
+    }
+    
+    .validate-btn:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+    
+    .test-btn {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+    
+    .test-btn:hover:not(:disabled) {
+      background: var(--border-light);
+    }
+    
+    .validate-btn:disabled, .test-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-top">
+        <div class="logo-section">
+          <div class="plugin-logo">
+            <svg width="32" height="32" viewBox="0 0 715 715" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M263.629 388.08C284.289 389.524 302.208 373.947 303.653 353.287V353.287C304.82 336.593 319.151 323.914 335.862 324.789V324.789C356.544 325.873 374.189 309.985 375.273 289.303C376.357 268.621 360.47 250.976 339.788 249.893V249.893C323.964 249.064 311.895 235.42 313 219.613V219.613C314.445 198.953 298.868 181.033 278.208 179.589C257.548 178.144 239.628 193.721 238.183 214.382V214.382C237.016 231.076 222.684 243.755 205.971 242.879V242.879C185.289 241.795 167.644 257.683 166.56 278.365C165.476 299.047 181.364 316.693 202.046 317.777V317.777C217.869 318.606 229.941 332.248 228.836 348.055V348.055C227.391 368.715 242.969 386.635 263.629 388.08Z" fill="white"/>
+              <path d="M50.7656 335.603C62.5929 166.465 209.294 38.9393 378.433 50.7665C547.571 62.5938 675.097 209.295 663.27 378.433C651.442 547.572 504.741 675.098 335.603 663.27C166.464 651.443 38.9384 504.742 50.7656 335.603Z" stroke="white" stroke-width="55"/>
+              <path d="M216.067 534.348C246.772 555.848 281.987 570.039 319.019 575.837C356.051 581.635 393.918 578.886 429.725 567.8C465.531 556.714 498.327 537.585 525.604 511.876C552.881 486.168 573.917 454.56 587.101 419.472L529.52 397.836C519.635 424.142 503.864 447.838 483.414 467.113C462.964 486.387 438.376 500.728 411.532 509.04C384.687 517.351 356.297 519.412 328.534 515.065C300.77 510.718 274.369 500.078 251.35 483.96L216.067 534.348Z" fill="white"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <h1>Helpme</h1>
+            <p>Populate templates with profile data</p>
+          </div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="upload-section">
+      <div class="input-tabs">
+        <button class="tab-btn active" data-tab="csv">📊 CSV Upload</button>
+        <button class="tab-btn" data-tab="sheets">🔗 Google Sheets</button>
+      </div>
+      
+      <div class="tab-content active" id="csvTab">
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">📊</div>
+          <h3>Upload LinkedIn Profile Data</h3>
+          <p>Drop your CSV file with base64 images here or click to browse</p>
+          <small>Supports .csv files up to 50MB</small>
+          <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+        </div>
+      </div>
+      
+      <div class="tab-content" id="sheetsTab">
+        <div class="sheets-input-area">
+          <div class="upload-icon">🔗</div>
+          <h3>Google Sheets URL</h3>
+          <p>Paste your Google Sheets URL to import data directly</p>
+          <small>Make sure the sheet is shared publicly or with link access</small>
+          <input type="url" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+          <div class="button-group">
+            <button class="validate-btn" id="validateSheetsBtn">Validate URL</button>
+            <button class="test-btn" id="testConnectionBtn">Test Connection</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-info" id="fileInfo">
+      <div class="file-info-title">File Selected</div>
+      <div class="file-info-details" id="fileDetails"></div>
+    </div>
+
+    <div class="settings">
+      <div class="settings-title">Processing Settings</div>
+
+      <div class="setting-group">
+        <label for="batchSize">Batch Size:</label>
+        <select id="batchSize">
+          <option value="5">5 profiles (Slower, safer)</option>
+          <option value="10" selected>10 profiles (Recommended)</option>
+          <option value="15">15 profiles (Faster)</option>
+          <option value="20">20 profiles (Fastest, high memory)</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <label for="imageProcessing">Image Processing:</label>
+        <select id="imageProcessing">
+          <option value="optimize">Optimize for performance</option>
+          <option value="original" selected>Keep original quality</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <label for="frameLayout">Frame Layout:</label>
+        <select id="frameLayout">
+          <option value="auto" selected>Auto-arrange frames</option>
+          <option value="grid">Grid layout (4 columns)</option>
+          <option value="list">Vertical list layout</option>
+          <option value="keep">Keep current positions</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="process-btn" id="processBtn" disabled>
+      Process LinkedIn Data
+    </button>
+
+    <div class="progress-section" id="progressSection">
+      <div class="progress-text" id="progressText">Processing...</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-details" id="progressDetails">
+        Preparing data...
+      </div>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div class="tips">
+      <div class="tips-title">💡 Quick Start Tips</div>
+      <ul>
+        <li>Create a template frame with text layers named "Name", "Designation", "Organization"</li>
+        <li>Add a rectangle/circle named "Image" or "Photo" for profile pictures</li>
+        <li><strong>CSV:</strong> Include base64 encoded images in a "ProfileImage" column</li>
+        <li><strong>Google Sheets:</strong> Include image URLs in a "ProfileImage" column</li>
+        <li>Select your template frame(s) before running the plugin</li>
+        <li>For best performance, keep images under 100KB each</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // UI State Management
+    let selectedFile = null;
+    let processingStartTime = null;
+
+    // DOM Elements
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileDetails = document.getElementById('fileDetails');
+    const processBtn = document.getElementById('processBtn');
+    const progressSection = document.getElementById('progressSection');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressDetails = document.getElementById('progressDetails');
+    const status = document.getElementById('status');
+    const sheetsUrl = document.getElementById('sheetsUrl');
+    const validateSheetsBtn = document.getElementById('validateSheetsBtn');
+    const themeToggle = document.getElementById('themeToggle');
+    
+    // Theme management
+    let currentTheme = 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    
+    themeToggle.addEventListener('click', () => {
+      console.log('Theme toggle clicked! Current theme:', currentTheme);
+      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      console.log('Theme changed to:', currentTheme);
+    });
+    
+    // Tab functionality
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        
+        // Update active tab button
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Update active tab content
+        tabContents.forEach(content => content.classList.remove('active'));
+        document.getElementById(tabName + 'Tab').classList.add('active');
+        
+        // Reset state when switching tabs
+        resetState();
+      });
+    });
+    
+    function resetState() {
+      selectedFile = null;
+      fileInfo.style.display = 'none';
+      processBtn.disabled = true;
+      processBtn.textContent = 'Process LinkedIn Data';
+      clearStatus();
+      progressSection.style.display = 'none';
+    }
+
+    // File Upload Handling
+    console.log('Setting up file upload handlers...');
+    uploadArea.addEventListener('click', () => {
+      console.log('Upload area clicked!');
+      fileInput.click();
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      // Validate file type
+      const validTypes = ['.csv', '.xlsx', '.xls'];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+      if (!validTypes.includes(fileExtension)) {
+        showStatus('error', 'Invalid file type. Please upload a CSV or Excel file.');
+        return;
+      }
+
+      // Validate file size (50MB limit)
+      if (file.size > 50 * 1024 * 1024) {
+        showStatus('error', 'File size too large. Please use files under 50MB.');
+        return;
+      }
+
+      selectedFile = file;
+
+      // Update upload area
+      uploadArea.innerHTML = `
+        <div class="upload-icon">✅</div>
+        <h3>File Ready</h3>
+        <p><strong>${file.name}</strong></p>
+        <small>Click to select a different file</small>
+      `;
+
+      // Show file info
+      fileInfo.style.display = 'block';
+      fileDetails.innerHTML = `
+        <strong>${file.name}</strong><br>
+        Size: ${formatFileSize(file.size)}<br>
+        Type: ${file.type || 'Unknown'}
+      `;
+
+      processBtn.disabled = false;
+      clearStatus();
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Google Sheets validation
+    validateSheetsBtn.addEventListener('click', async () => {
+      const url = sheetsUrl.value.trim();
+      if (!url) {
+        showStatus('error', 'Please enter a Google Sheets URL');
+        return;
+      }
+      
+      // Basic URL validation
+      if (!url.includes('docs.google.com/spreadsheets/d/')) {
+        showStatus('error', 'Please enter a valid Google Sheets URL');
+        return;
+      }
+      
+      validateSheetsBtn.disabled = true;
+      validateSheetsBtn.textContent = 'Validating...';
+      
+      try {
+        // Use the plugin's test connection function
+        parent.postMessage({
+          pluginMessage: {
+            type: 'test-connection',
+            sheetsUrl: url
+          }
+        }, '*');
+        
+        // Show file info for sheets
+        fileInfo.style.display = 'block';
+        fileDetails.innerHTML = `
+          <strong>Google Sheets</strong><br>
+          URL: ${url.substring(0, 50)}...<br>
+          Type: Google Sheets<br>
+          Status: 🔄 Testing connection...
+        `;
+        
+      } catch (error) {
+        console.error('Validation error:', error);
+        showStatus('error', `Validation failed: ${error.message}`);
+        processBtn.disabled = true;
+      } finally {
+        validateSheetsBtn.disabled = false;
+        validateSheetsBtn.textContent = 'Validate URL';
+      }
+    });
+    
+    // Test Connection Button Handler
+    document.getElementById('testConnectionBtn').addEventListener('click', async () => {
+      const url = sheetsUrl.value.trim();
+      if (!url) {
+        showStatus('error', 'Please enter a Google Sheets URL');
+        return;
+      }
+      
+      if (!url.includes('docs.google.com/spreadsheets/d/')) {
+        showStatus('error', 'Please enter a valid Google Sheets URL');
+        return;
+      }
+      
+      const testBtn = document.getElementById('testConnectionBtn');
+      testBtn.disabled = true;
+      testBtn.textContent = 'Testing...';
+      
+      try {
+        // Send test connection request to plugin
+        parent.postMessage({
+          pluginMessage: {
+            type: 'test-connection',
+            sheetsUrl: url
+          }
+        }, '*');
+        
+        showStatus('info', 'Testing connection to Google Sheets...');
+        
+      } catch (error) {
+        console.error('Test connection error:', error);
+        showStatus('error', `Test failed: ${error.message}`);
+      } finally {
+        testBtn.disabled = false;
+        testBtn.textContent = 'Test Connection';
+      }
+    });
+    
+    // Process Button Handler
+    processBtn.addEventListener('click', async () => {
+      // Check which tab is active
+      const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+      
+      if (activeTab === 'sheets') {
+        // Process Google Sheets
+        const url = sheetsUrl.value.trim();
+        if (!url) {
+          showStatus('error', 'Please enter a Google Sheets URL');
+          return;
+        }
+        
+        const settings = {
+          batchSize: parseInt(document.getElementById('batchSize').value),
+          imageProcessing: document.getElementById('imageProcessing').value,
+          frameLayout: document.getElementById('frameLayout').value
+        };
+        
+        // Send Google Sheets data to plugin
+        parent.postMessage({
+          pluginMessage: {
+            type: 'process-sheets',
+            sheetsUrl: url,
+            settings: settings
+          }
+        }, '*');
+        
+        // Update UI for processing state
+        processBtn.disabled = true;
+        processBtn.textContent = 'Processing...';
+        progressSection.style.display = 'block';
+        progressText.textContent = 'Starting processing...';
+        progressDetails.textContent = 'Fetching Google Sheets data...';
+        
+        return;
+      }
+      
+      // Process CSV file
+      if (!selectedFile) return;
+
+      processingStartTime = Date.now();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const settings = {
+          batchSize: parseInt(document.getElementById('batchSize').value),
+          imageProcessing: document.getElementById('imageProcessing').value,
+          frameLayout: document.getElementById('frameLayout').value
+        };
+
+        // Send data to plugin
+        parent.postMessage({
+          pluginMessage: {
+            type: 'process-data',
+            csvData: e.target.result,
+            settings: settings
+          }
+        }, '*');
+      };
+
+      reader.onerror = () => {
+        showStatus('error', 'Failed to read file. Please try again.');
+      };
+
+      reader.readAsText(selectedFile);
+
+      // Update UI for processing state
+      processBtn.disabled = true;
+      processBtn.textContent = 'Processing...';
+      progressSection.style.display = 'block';
+      progressText.textContent = 'Starting processing...';
+      progressDetails.textContent = 'Reading file and parsing data...';
+      clearStatus();
+    });
+
+    // Listen for messages from the plugin
+    window.addEventListener('message', (event) => {
+      if (event.data.pluginMessage) {
+        const message = event.data.pluginMessage;
+        
+        switch (message.type) {
+          case 'status':
+            showStatus('info', message.message);
+            break;
+          case 'error':
+            showStatus('error', message.message);
+            break;
+          case 'progress':
+            updateProgress(message.current, message.total, message.avgTime, message.remaining);
+            break;
+          case 'complete':
+            showStatus('success', `Processing complete! ${message.total} profiles processed in ${Math.round(message.time / 1000)}s`);
+            processBtn.disabled = false;
+            processBtn.textContent = 'Process LinkedIn Data';
+            progressSection.style.display = 'none';
+            break;
+          case 'test-result':
+            handleTestResult(message);
+            break;
+        }
+      }
+    });
+    
+    // Handle test connection results
+    function handleTestResult(message) {
+      if (message.success) {
+        showStatus('success', message.message);
+        processBtn.disabled = false;
+        processBtn.textContent = 'Process LinkedIn Data';
+        
+        // Update file info with test results
+        fileInfo.style.display = 'block';
+        fileDetails.innerHTML = `
+          <strong>Google Sheets</strong><br>
+          Sheet ID: ${message.details.sheetId}<br>
+          Status: ✅ Connected & Accessible<br>
+          Data Sample: ${message.details.sampleData}<br>
+          Response: HTTP ${message.details.status}
+        `;
+        
+        console.log('Test connection successful:', message.details);
+      } else {
+        showStatus('error', `Connection test failed: ${message.message}`);
+        processBtn.disabled = true;
+        
+        // Update file info with error
+        fileInfo.style.display = 'block';
+        fileDetails.innerHTML = `
+          <strong>Google Sheets</strong><br>
+          Status: ❌ Connection Failed<br>
+          Error: ${message.message}
+        `;
+        
+        console.error('Test connection failed:', message.message);
+      }
+    }
+    
+    // Update progress bar
+    function updateProgress(current, total, avgTime, remaining) {
+      const percent = (current / total) * 100;
+      progressFill.style.width = percent + '%';
+      progressText.textContent = `Processing ${current} of ${total} profiles`;
+      
+      if (avgTime && remaining !== undefined) {
+        progressDetails.textContent = `~${remaining}s remaining • ${avgTime}ms per profile`;
+      }
+    }
+    
+    // Reset UI to initial state
+    function resetUI() {
+      processBtn.disabled = false;
+      processBtn.textContent = 'Process LinkedIn Data';
+      progressSection.style.display = 'none';
+      showStatus('info', 'Ready to process data');
+    }
+    
+    function showStatus(type, message) {
+      status.className = `status ${type}`;
+      status.textContent = message;
+      status.style.display = 'block';
+      
+      // Auto-hide success messages after 5 seconds
+      if (type === 'success') {
+        setTimeout(() => {
+          status.style.display = 'none';
+        }, 5000);
+      }
+    }
+    
+    function clearStatus() {
+      status.style.display = 'none';
+    }
+
+    // Initialize UI
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Plugin UI loaded successfully');
+      console.log('Upload area:', uploadArea);
+      console.log('Theme toggle:', themeToggle);
+      console.log('Process button:', processBtn);
+      
+      // Focus on the upload area initially
+      uploadArea.focus();
+    });
+  </script>
+</body>
+</html>
+
