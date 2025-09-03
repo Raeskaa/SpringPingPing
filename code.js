@@ -84,12 +84,6 @@ figma.ui.onmessage = async (msg) => {
 };
 // Process profiles with the existing logic
 async function processProfiles(profiles, settings) {
-    // Clear image cache if background removal is enabled to ensure fresh processing
-    if (settings.imageProcessing === 'remove-background') {
-        console.log('🔄 Background removal enabled - clearing image cache for fresh processing');
-        imageCache.clear();
-    }
-    
     figma.ui.postMessage({
         type: 'status',
         message: `Found ${profiles.length} profiles. Validating template...`
@@ -563,23 +557,29 @@ async function populateTextFields(frame, profile) {
     for (const textNode of textNodes) {
         const nodeName = textNode.name.toLowerCase();
         console.log(`Processing text node: "${textNode.name}" (${nodeName})`);
+        console.log(`Current text content: "${textNode.characters}"`);
         let newText = '';
         
-        if (nodeName.includes('name') || nodeName.includes('speaker') || nodeName.includes('participant')) {
+        // More flexible text matching - handle various naming conventions
+        if (nodeName.includes('name') || nodeName.includes('speaker') || nodeName.includes('participant') || 
+            nodeName.includes('peonal') || nodeName.includes('p1') || nodeName.includes('p2')) {
             newText = profile.name;
             console.log(`Setting name to: ${newText}`);
         }
-        else if (nodeName.includes('designation') || nodeName.includes('title') || nodeName.includes('position')) {
+        else if (nodeName.includes('designation') || nodeName.includes('title') || nodeName.includes('position') || 
+                 nodeName.includes('p2') || nodeName.includes('role')) {
             newText = profile.designation;
             console.log(`Setting designation to: ${newText}`);
         }
-        else if (nodeName.includes('org') || nodeName.includes('company') || nodeName.includes('employer')) {
+        else if (nodeName.includes('org') || nodeName.includes('company') || nodeName.includes('employer') || 
+                 nodeName.includes('o9') || nodeName.includes('organization')) {
             newText = profile.organization;
             console.log(`Setting organization to: ${newText}`);
         }
         
-        if (newText && newText !== textNode.characters) {
+        if (newText) {
             try {
+                // Always try to update the text, regardless of current content
                 await figma.loadFontAsync(textNode.fontName);
                 textNode.characters = newText;
                 console.log(`Successfully updated "${textNode.name}" to "${newText}"`);
@@ -597,26 +597,18 @@ async function populateTextFields(frame, profile) {
             }
         }
         else {
-            console.log(`No change needed for "${textNode.name}"`);
+            console.log(`No text data found for "${textNode.name}"`);
         }
     }
 }
 
-// Populate image field with URL (for Google Sheets) - with background removal
+// Populate image field with URL (for Google Sheets)
 async function populateImageField(frame, imageUrl, processingMode) {
     try {
         console.log('Processing image URL:', imageUrl);
-        console.log('Processing mode:', processingMode); // Debug: see what mode is received
         
         // Check cache first
         let imageHash = imageCache.get(imageUrl);
-        
-        // If background removal is enabled, always process the image (don't use cache)
-        if (processingMode === 'remove-background') {
-            console.log('🔄 Background removal enabled - bypassing cache to process image');
-            imageHash = null; // Force processing
-        }
-        
         if (!imageHash) {
             // Fetch image from URL
             const response = await fetch(imageUrl);
@@ -630,23 +622,8 @@ async function populateImageField(frame, imageUrl, processingMode) {
                 return;
             }
             
-            // Apply background removal if enabled
-            let processedImageData = uint8Array;
-            if (processingMode === 'remove-background') {
-                try {
-                    console.log('🔄 Background removal enabled - processing image...');
-                    processedImageData = await removeBackgroundFromImage(uint8Array);
-                    console.log('✅ Background removal completed successfully');
-                } catch (bgError) {
-                    console.warn('⚠️ Background removal failed, using original image:', bgError.message);
-                    processedImageData = uint8Array;
-                }
-            } else {
-                console.log('ℹ️ Background removal not enabled, using original image');
-            }
-            
             // Create Figma image
-            const image = figma.createImage(processedImageData);
+            const image = figma.createImage(uint8Array);
             imageHash = image.hash;
             
             // Cache for future use (limit cache size)
@@ -697,110 +674,6 @@ async function populateImageField(frame, imageUrl, processingMode) {
         console.warn('Error populating image:', error);
         // Continue without image rather than failing
     }
-}
-
-// Background removal function using free API service
-async function removeBackgroundFromImage(imageBuffer) {
-    try {
-        console.log('🔄 Starting background removal process...');
-        console.log('📊 Image buffer size:', imageBuffer.byteLength, 'bytes');
-        
-        // Convert ArrayBuffer to base64
-        const base64Image = arrayBufferToBase64(imageBuffer);
-        console.log('🔄 Image converted to base64, length:', base64Image.length);
-        
-        // Use remove.bg API (free tier: 50 images/month)
-        const apiKey = 'HZrvxg1Gn6cbffNKBTXMckJ1';
-        console.log('🔑 Using API key:', apiKey.substring(0, 8) + '...');
-        
-        const apiUrl = 'https://api.remove.bg/v1.0/removebg';
-        console.log('🌐 Calling API:', apiUrl);
-        
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'X-Api-Key': apiKey,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                image_url: null,
-                image_base64: base64Image,
-                size: 'auto'
-            })
-        });
-        
-        console.log('📡 API response status:', response.status);
-        console.log('📡 API response headers:', Object.fromEntries(response.headers.entries()));
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ API error response:', errorText);
-            throw new Error(`Background removal API failed: ${response.status} - ${errorText}`);
-        }
-        
-        const processedImageBuffer = await response.arrayBuffer();
-        console.log('✅ Received processed image, size:', processedImageBuffer.byteLength, 'bytes');
-        
-        return new Uint8Array(processedImageBuffer);
-        
-    } catch (error) {
-        console.error('❌ Background removal failed:', error);
-        
-        // Fallback: Try alternative free service (remove.bg alternative)
-        try {
-            console.log('🔄 Trying alternative background removal service...');
-            return await removeBackgroundAlternative(imageBuffer);
-        } catch (fallbackError) {
-            console.error('❌ Alternative background removal also failed:', fallbackError);
-            throw new Error('Background removal unavailable');
-        }
-    }
-}
-
-// Alternative background removal using different free service
-async function removeBackgroundAlternative(imageBuffer) {
-    try {
-        // Convert to base64
-        const base64Image = arrayBufferToBase64(imageBuffer);
-        
-        // Use alternative service (example: Cloudinary with background removal)
-        const response = await fetch('https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                file: `data:image/jpeg;base64,${base64Image}`,
-                upload_preset: 'YOUR_UPLOAD_PRESET',
-                transformation: 'e_bgremoval'
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Alternative service failed: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        const processedImageUrl = result.secure_url;
-        
-        // Download the processed image
-        const imageResponse = await fetch(processedImageUrl);
-        const processedImageBuffer = await imageResponse.arrayBuffer();
-        return new Uint8Array(processedImageBuffer);
-        
-    } catch (error) {
-        throw new Error(`Alternative background removal failed: ${error.message}`);
-    }
-}
-
-// Utility function to convert ArrayBuffer to base64
-function arrayBufferToBase64(buffer) {
-    const bytes = new Uint8Array(buffer);
-    let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
 }
 
 // Utility function to chunk arrays for batch processing
