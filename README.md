@@ -173,7 +173,7 @@ Jane Smith,Product Manager,Startup Inc,https://linkedin.com/in/janesmith,https:/
 
 ### Plugin Issues
 - **Plugin won't open** → Check that `manifest.json` is valid
-- **Images not loading** → Ensure image URLs are direct links (not LinkedIn profile pages)
+- **Images not loading** → Ensure image URLs are direct links (not LinkedIn profile pages). Empty image fields will show placeholder images with light red background and initials automatically.
 - **Templates not found** → Make sure frames are named with template keywords
 
 ### Template Issues
@@ -207,7 +207,7 @@ Jane Smith,Product Manager,Startup Inc,https://linkedin.com/in/janesmith,https:/
 - ✅ **Dual Input Methods** - Google Sheets or CSV upload
 - ✅ **CORS Proxy Support** - Bypasses browser restrictions for Google Sheets
 - ✅ **Data Preview** - See your data before processing
-- ✅ **Image Support** - Handle profile pictures from URLs
+- ✅ **Image Support** - Handle profile pictures from URLs with automatic placeholders (light red background + initials)
 - ✅ **Template Detection** - Automatically find and use templates
 - ✅ **Batch Processing** - Process multiple profiles efficiently
 - ✅ **Progress Tracking** - Real-time processing updates
@@ -221,7 +221,7 @@ Jane Smith,Product Manager,Startup Inc,https://linkedin.com/in/janesmith,https:/
 1. **Data Preview:** Both methods show a preview of loaded data before processing
 2. **Switch Methods:** You can switch between Google Sheets and CSV anytime
 3. **Column Flexibility:** Extra columns are preserved, missing ones are handled gracefully
-4. **Profile Images:** Leave ProfileImage column empty if you don't have image URLs yet
+4. **Profile Images:** Leave ProfileImage column empty if you don't have image URLs yet - the plugin will automatically add placeholder images with light red background and initials (e.g., "MT" for "Mahesh Tipathi")
 5. **Team Workflow:** Use Google Sheets for team collaboration, CSV for individual work
 6. **CORS Fallback:** If Google Sheets fails, the plugin will suggest using CSV upload
 7. **Font Issues:** The plugin now handles font loading properly to avoid text errors

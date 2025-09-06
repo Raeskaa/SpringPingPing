@@ -266,18 +266,16 @@ async function populateFrame(frame, profile, imageProcessing) {
             }
         }
         
-        // Handle profile image
-        if (profile.imageUrl) {
-            await populateImageField(frame, profile.imageUrl, imageProcessing);
-        }
+        // Handle profile image (always populate, use placeholder if no URL)
+        await populateImageField(frame, profile.imageUrl, imageProcessing, profile.name);
         
     } catch (error) {
         console.error('Error populating frame:', error);
     }
 }
 
-// Populate image field with profile picture
-async function populateImageField(frame, imageUrl, imageProcessing) {
+// Populate image field with profile picture or placeholder
+async function populateImageField(frame, imageUrl, imageProcessing, profileName = '') {
     try {
         const imageNode = frame.findOne(node => 
             node.type === 'RECTANGLE' && node.name.toLowerCase().includes('image')
@@ -288,6 +286,13 @@ async function populateImageField(frame, imageUrl, imageProcessing) {
             return;
         }
         
+        // If no image URL provided, use placeholder
+        if (!imageUrl || imageUrl.trim() === '') {
+            console.log('No image URL provided, using placeholder');
+            await setPlaceholderImage(imageNode, profileName);
+            return;
+        }
+            
         // Check cache first
         if (imageCache.has(imageUrl)) {
             const cachedImage = imageCache.get(imageUrl);
@@ -298,51 +303,113 @@ async function populateImageField(frame, imageUrl, imageProcessing) {
         // Fetch and process image
         let processedImage;
         
-        if (imageUrl.startsWith('data:image/svg+xml;base64,')) {
-            // Handle SVG data URLs
-            const base64Data = imageUrl.split(',')[1];
-            const binaryString = atob(base64Data);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
+        try {
+            if (imageUrl.startsWith('data:image/svg+xml;base64,')) {
+                // Handle SVG data URLs
+                const base64Data = imageUrl.split(',')[1];
+                const binaryString = atob(base64Data);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                processedImage = figma.createImage(bytes);
+            } else {
+                // Handle regular URLs
+                const response = await fetch(imageUrl);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch image: ${response.status}`);
+                }
+                const imageBytes = await response.arrayBuffer();
+                const bytes = new Uint8Array(imageBytes);
+                processedImage = figma.createImage(bytes);
             }
-            processedImage = figma.createImage(bytes);
-        } else {
-            // Handle regular URLs
-            const response = await fetch(imageUrl);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch image: ${response.status}`);
-            }
-            const imageBytes = await response.arrayBuffer();
-            const bytes = new Uint8Array(imageBytes);
-            processedImage = figma.createImage(bytes);
+            
+            // Create image fill
+            const imageFill = {
+                type: 'IMAGE',
+                imageHash: processedImage.hash,
+                scaleMode: 'FILL'
+            };
+            
+            // Cache the image
+            imageCache.set(imageUrl, imageFill);
+            
+            // Apply to node
+            imageNode.fills = [imageFill];
+            
+        } catch (imageError) {
+            console.error('Error processing image:', imageError);
+            // Use placeholder if image fails to load
+            await setPlaceholderImage(imageNode, profileName);
         }
-        
-        // Create image fill
-        const imageFill = {
-            type: 'IMAGE',
-            imageHash: processedImage.hash,
-            scaleMode: 'FILL'
-        };
-        
-        // Cache the image
-        imageCache.set(imageUrl, imageFill);
-        
-        // Apply to node
-        imageNode.fills = [imageFill];
         
     } catch (error) {
-        console.error('Error processing image:', error);
-        // Create a placeholder if image fails
+        console.error('Error in populateImageField:', error);
+        // Fallback to placeholder
+        await setPlaceholderImage(imageNode, profileName);
+    }
+}
+
+// Set placeholder image for profile picture with initials
+async function setPlaceholderImage(imageNode, profileName = '') {
+    try {
+        // Create light red background
         const placeholderFill = {
             type: 'SOLID',
-            color: { r: 0.9, g: 0.9, b: 0.9 }
+            color: { r: 1, g: 0.8, b: 0.8 } // Light red
         };
-        const imageNode = frame.findOne(node => 
-            node.type === 'RECTANGLE' && node.name.toLowerCase().includes('image')
-        );
-        if (imageNode && imageNode.type === 'RECTANGLE') {
-            imageNode.fills = [placeholderFill];
+        
+        imageNode.fills = [placeholderFill];
+        
+        // Add a subtle border
+        imageNode.strokes = [{
+            type: 'SOLID',
+            color: { r: 0.9, g: 0.6, b: 0.6 } // Slightly darker red border
+        }];
+        imageNode.strokeWeight = 1;
+        
+        // Generate initials from name
+        const initials = generateInitials(profileName);
+        
+        // Create text node for initials
+        const textNode = figma.createText();
+        textNode.name = 'Initials';
+        textNode.characters = initials;
+        
+        // Load font and style the text
+        await figma.loadFontAsync({ family: "Inter", style: "Bold" });
+        textNode.fontName = { family: "Inter", style: "Bold" };
+        textNode.fontSize = Math.min(imageNode.width, imageNode.height) * 0.4; // 40% of the smaller dimension
+        textNode.fills = [{ type: 'SOLID', color: { r: 0.6, g: 0.2, b: 0.2 } }]; // Dark red text
+        
+        // Center the text
+        textNode.x = imageNode.x + (imageNode.width - textNode.width) / 2;
+        textNode.y = imageNode.y + (imageNode.height - textNode.height) / 2;
+        
+        // Add text to the same parent as the image node
+        if (imageNode.parent) {
+            imageNode.parent.appendChild(textNode);
         }
+        
+        console.log(`Applied placeholder image with initials: ${initials}`);
+        
+    } catch (error) {
+        console.error('Error setting placeholder image:', error);
+    }
+}
+
+// Generate initials from name
+function generateInitials(name) {
+    if (!name || name.trim() === '') {
+        return '?';
+    }
+    
+    const words = name.trim().split(/\s+/);
+    if (words.length === 1) {
+        // Single word - take first two characters
+        return words[0].substring(0, 2).toUpperCase();
+    } else {
+        // Multiple words - take first character of each word
+        return words.map(word => word.charAt(0)).join('').toUpperCase();
     }
 }
