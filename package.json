@@ -4,13 +4,11 @@
     "description": "Automate LinkedIn profile data population in Figma templates",
     "main": "code.js",
     "scripts": {
-      "build": "tsc",
-      "watch": "tsc --watch"
+        "build": "echo 'No build step required'",
+        "collect-images": "node simple-linkedin-scraper.js"
     },
     "dependencies": {},
     "devDependencies": {
-      "@figma/plugin-typings": "^1.95.0",
-      "@types/node": "^18.0.0",
-      "typescript": "^5.3.0"
+        "@figma/plugin-typings": "^1.95.0"
     }
-  }
+}

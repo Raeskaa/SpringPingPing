@@ -1,200 +1,159 @@
 # LinkedIn Profile Populator - Figma Plugin
 
-A Figma plugin that automatically populates event templates with LinkedIn profile data from CSV files containing base64 encoded images.
+A simple Figma plugin that automatically populates profile templates with LinkedIn data and images from CSV files.
 
-## 🚀 Features
+## 🚀 Quick Start
 
-- ⚡ **Lightning fast processing** - 100 profiles in ~3 seconds
-- 📊 **CSV with base64 images** - No web scraping, no legal issues
-- 🎯 **Smart template detection** - Automatically finds and fills text/image layers
-- 🔄 **Batch processing** - Configurable batch sizes for optimal performance
-- 📱 **Modern UI** - Native Figma styling with real-time progress
-- 🛡️ **Error handling** - Robust error recovery and user feedback
+### 1. Install the Plugin
+1. Open Figma
+2. Go to **Plugins** → **Development** → **Import plugin from manifest**
+3. Select the `manifest.json` file from this folder
+4. The plugin will appear in your plugins list
 
-## 📋 Prerequisites
+### 2. Prepare Your Data
+1. Create a CSV file with the following columns:
+   - **Name** - Person's full name
+   - **Designation** - Job title/position
+   - **Org** - Company/organization
+   - **LinkedinId** - LinkedIn profile URL
+   - **ProfileImage** - Direct URL to profile picture
 
-- Figma Desktop App
-- Node.js (v16 or later)
-- TypeScript
-- Basic knowledge of Figma and CSV files
+2. **Get LinkedIn Profile Pictures:**
+   ```bash
+   node simple-linkedin-scraper.js your-file.csv
+   ```
+   This creates `linkedin-image-collector.html` - open it in your browser to manually collect profile picture URLs.
 
-## 🛠️ Setup Instructions
+### 3. Create Figma Templates
+1. Create frames named with: `template`, `profile`, `card`, or `frame`
+2. Add text elements named: `Name`, `Designation`, `Org`
+3. Add a rectangle named: `ProfileImage` (for profile pictures)
 
-### 1. Clone/Download Project Files
+### 4. Use the Plugin
+1. Open the plugin in Figma
+2. Upload your CSV file
+3. Adjust settings if needed
+4. Click **"Process Profiles"**
 
-Make sure you have all these files in your project folder:
+## 📁 File Structure
+
 ```
-linkedin-profile-figma-plugin/
-├── manifest.json
-├── package.json  
-├── tsconfig.json
-├── code.ts
-├── ui.html
-├── README.md
-└── example_data.csv
+linkedin-profile-plugin/
+├── code.js                    # Main plugin code
+├── ui.html                    # Plugin interface
+├── manifest.json              # Plugin configuration
+├── simple-linkedin-scraper.js # Manual image collector
+├── package.json               # Dependencies
+└── README.md                  # This file
 ```
 
-### 2. Install Dependencies
+## 🛠️ Manual Image Collection
 
-Open terminal/command prompt in your project folder and run:
+Since automated LinkedIn scraping has technical limitations, use the manual approach:
 
+### Step 1: Generate Image Collector
 ```bash
-npm install
+node simple-linkedin-scraper.js SpringVerify_demo.csv
 ```
 
-### 3. Compile TypeScript
+### Step 2: Collect Images
+1. Open `linkedin-image-collector.html` in your browser
+2. Click each LinkedIn URL to open the profile
+3. Right-click on profile pictures and "Copy image address"
+4. Paste URLs into the text fields
+5. Download the updated CSV when done
 
-Compile the TypeScript code to JavaScript:
+### Step 3: Use in Figma
+1. Upload the updated CSV to the Figma plugin
+2. Process profiles to populate templates
 
-```bash
-npm run build
-```
+## ⚙️ CSV Format
 
-This creates `code.js` which is what Figma actually runs.
+Your CSV should look like this:
 
-### 4. Load Plugin in Figma
-
-1. Open Figma Desktop App
-2. Go to Menu → Plugins → Development → Import plugin from manifest...
-3. Select your `manifest.json` file
-4. The plugin will now appear in your Plugins menu
-
-### 5. Prepare Your CSV Data
-
-Your CSV file should have these columns:
-- **Name**: Full name of the person
-- **Designation**: Job title/position  
-- **Org**: Company/organization name
-- **ProfileImage**: Base64 encoded image data
-- **LinkedIn ID**: (Optional) LinkedIn profile URL
-
-Example CSV format:
 ```csv
-Name,Designation,Org,ProfileImage,LinkedIn ID
-John Doe,VP Marketing,Tech Corp,data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...,john-doe-123
-Jane Smith,Head of HR,Startup Inc,data:image/png;base64,iVBORw0KGgoAAAANSU...,jane-smith-456
+Name,Designation,Org,LinkedinId,ProfileImage
+John Doe,Software Engineer,Acme Corp,https://linkedin.com/in/johndoe,https://media.licdn.com/dms/image/...
+Jane Smith,Designer,Tech Inc,https://linkedin.com/in/janesmith,https://media.licdn.com/dms/image/...
 ```
 
-### 6. Create Template Frame
+## 🎨 Figma Template Setup
 
-1. Create a Frame in Figma
-2. Add text layers named: "Name", "Designation", "Organization" 
-3. Add a Rectangle or Ellipse named: "Image", "Photo", or "Picture"
-4. Select your template frame(s) before running the plugin
+### Frame Naming
+- Name your frames with: `template`, `profile`, `card`, or `frame`
+- The plugin will find and use these as templates
 
-## 🎯 How to Use
+### Text Elements
+- **Name** - For person's name
+- **Designation** - For job title
+- **Org** - For company name
 
-1. **Select template frames** in Figma (or create frames with "template" in the name)
-2. **Run the plugin** from Plugins menu
-3. **Upload your CSV file** with base64 images
-4. **Configure settings** (batch size, layout, etc.)
-5. **Click "Process LinkedIn Data"**
-6. Watch as your template fills automatically! ⚡
+### Image Placeholder
+- Create a **rectangle** named `ProfileImage`
+- This will be filled with the profile picture
 
-## ⚙️ Configuration Options
+## 🔧 Plugin Settings
 
-### Batch Size
-- **5 profiles**: Slower but uses less memory
-- **10 profiles**: Recommended balance (default)
-- **15 profiles**: Faster processing
-- **20 profiles**: Fastest but uses more memory
-
-### Frame Layout
-- **Auto-arrange**: Places frames horizontally
-- **Grid layout**: 4-column grid arrangement
-- **Vertical list**: Stacks frames vertically
-- **Keep current**: Maintains existing positions
-
-### Image Processing
-- **Optimize**: Compresses images for better performance
-- **Original**: Keeps original image quality
-
-## 🖼️ Image Requirements
-
-For best performance:
-- **Format**: JPEG (smaller) or PNG (better quality)
-- **Size**: 400x400 pixels maximum
-- **File size**: Under 100KB per image
-- **Encoding**: Base64 with proper data URI format
-
-## 📝 Converting Images to Base64
-
-### Online Converters
-- base64-image.de
-- base64.guru
-- Any "image to base64" converter
-
-### Python Script (Batch Conversion)
-```python
-import base64
-from PIL import Image
-import os
-
-def convert_image_to_base64(image_path):
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode('utf-8')
-
-# Convert all images in a folder
-for filename in os.listdir('images/'):
-    if filename.endswith('.jpg') or filename.endswith('.png'):
-        base64_data = convert_image_to_base64(f'images/{filename}')
-        print(f"{filename}: data:image/jpeg;base64,{base64_data}")
-```
-
-## 🚀 Performance Benchmarks
-
-- **Small datasets (1-50 profiles)**: 1-3 seconds
-- **Medium datasets (50-200 profiles)**: 5-15 seconds  
-- **Large datasets (200+ profiles)**: 20-60 seconds
+- **Batch Size**: Number of profiles to process at once (5-50)
+- **Image Processing**: Quality settings for images
+- **Frame Layout**: How to arrange multiple frames
 
 ## 🐛 Troubleshooting
 
-### "No template frames found"
-- Create a frame and select it before running
-- Or name your frame with "template" in the title
+### Plugin Won't Open
+- Make sure you're using the latest version
+- Check that `manifest.json` is valid
 
-### "Invalid base64 data"
-- Check your base64 encoding format
-- Ensure proper data URI prefix: `data:image/jpeg;base64,`
+### Images Not Loading
+- Ensure image URLs are direct links (not LinkedIn profile pages)
+- Check that URLs are accessible (not private/restricted)
+- Try using the manual image collector for reliable URLs
 
-### "File size too large"
-- Keep CSV files under 50MB
-- Optimize images to reduce file size
+### Templates Not Found
+- Make sure frames are named with: `template`, `profile`, `card`, or `frame`
+- Check that text elements are named: `Name`, `Designation`, `Org`
+- Ensure image placeholder is a rectangle named `ProfileImage`
 
-### Images not appearing
-- Add a Rectangle/Ellipse named "Image" to your template
-- Check that base64 data is properly formatted
+## 📝 Example Workflow
 
-## 🔧 Development
+1. **Prepare Data:**
+   ```bash
+   # Generate image collector
+   node simple-linkedin-scraper.js my-profiles.csv
+   
+   # Open linkedin-image-collector.html in browser
+   # Collect profile picture URLs manually
+   # Download updated CSV
+   ```
 
-### Watch Mode
-For development with auto-recompilation:
-```bash
-npm run watch
-```
+2. **Setup Figma:**
+   - Create profile template frame
+   - Add text elements: Name, Designation, Org
+   - Add rectangle: ProfileImage
 
-### File Structure
-- `code.ts` - Main plugin logic
-- `ui.html` - User interface  
-- `manifest.json` - Plugin configuration
-- `package.json` - Dependencies and scripts
+3. **Process:**
+   - Open plugin in Figma
+   - Upload updated CSV
+   - Click "Process Profiles"
+   - Watch your templates populate!
+
+## 🎯 Features
+
+- ✅ **CSV Processing** - Upload and process profile data
+- ✅ **Image Support** - Handle profile pictures from URLs
+- ✅ **Template Detection** - Automatically find and use templates
+- ✅ **Batch Processing** - Process multiple profiles efficiently
+- ✅ **Manual Image Collection** - Reliable way to get LinkedIn images
+- ✅ **Error Handling** - Graceful fallbacks for missing data
 
 ## 📄 License
 
-MIT License - Feel free to use and modify!
+This project is open source and available under the MIT License.
 
 ## 🤝 Contributing
 
-Issues and pull requests welcome! This plugin is designed to be fast, reliable, and easy to use.
-
-## 💡 Tips for Success
-
-1. **Test with small datasets first** (5-10 profiles)
-2. **Optimize your images** before converting to base64
-3. **Use consistent naming** in your template layers
-4. **Select template frames** before running
-5. **Keep the Figma console open** to see any error messages
+Feel free to submit issues and enhancement requests!
 
 ---
 
-Built with ❤️ for the Figma community. No more manual copy-pasting of LinkedIn profiles! 🚀
+**Need help?** Check the troubleshooting section or create an issue in the repository.
