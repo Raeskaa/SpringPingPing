@@ -15,18 +15,25 @@ const imageCache = new Map();
 
 figma.ui.onmessage = async (msg) => {
     if (msg.type === 'process-data') {
-        const { csvData, settings } = msg;
+        const { csvData, settings, source } = msg;
+        
         try {
             figma.ui.postMessage({
                 type: 'status',
-                message: 'Parsing CSV data...'
+                message: `Processing data from ${source === 'google-sheets' ? 'Google Sheets' : 'CSV file'}...`
             });
-            
+
             // Parse CSV data
             const profiles = await parseCSVData(csvData);
             
+            figma.ui.postMessage({
+                type: 'status',
+                message: `Found ${profiles.length} profiles. Processing templates...`
+            });
+
             // Process profiles
             await processProfiles(profiles, settings);
+
         } catch (error) {
             console.error('Plugin error:', error);
             const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -37,6 +44,7 @@ figma.ui.onmessage = async (msg) => {
         }
     }
 };
+
 
 // Parse CSV data into profile objects
 async function parseCSVData(csvData) {
@@ -146,7 +154,7 @@ function findTemplateFrames(requiredCount) {
         for (let i = 0; i < needed; i++) {
             const duplicate = templateFrame.clone();
             duplicate.x = templateFrame.x + (i + 1) * (templateFrame.width + 50);
-            duplicate.y = templateFrame.y;
+                duplicate.y = templateFrame.y;
             duplicate.name = `${templateFrame.name} ${i + 2}`;
             frames.push(duplicate);
         }

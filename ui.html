@@ -2,501 +2,728 @@
 <html>
 <head>
   <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LinkedIn Profile Populator</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --primary-color: #0077b5;
-      --primary-hover: #005885;
-      --primary-light: #e8f4f8;
-      --success-color: #10b981;
-      --success-light: #d1fae5;
-      --warning-color: #f59e0b;
-      --warning-light: #fef3c7;
-      --error-color: #ef4444;
-      --error-light: #fee2e2;
-      --text-primary: #1f2937;
-      --text-secondary: #6b7280;
-      --text-tertiary: #9ca3af;
-      --border-color: #e5e7eb;
-      --border-light: #f3f4f6;
-      --bg-primary: #ffffff;
-      --bg-secondary: #f9fafb;
-      --bg-tertiary: #f3f4f6;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.5;
-      font-size: 14px;
-    }
-
-    .container {
-      padding: 20px;
-      max-width: 100%;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .header h1 {
-      color: var(--primary-color);
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .header p {
-      color: var(--text-secondary);
-      font-size: 14px;
-    }
-
-    .upload-area {
-      border: 2px dashed var(--border-color);
-      border-radius: 12px;
-      padding: 40px 20px;
-      text-align: center;
-      background: var(--bg-secondary);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-
-    .upload-area:hover {
-      border-color: var(--primary-color);
-      background: var(--primary-light);
-    }
-
-    .upload-area.dragover {
-      border-color: var(--primary-color);
-      background: var(--primary-light);
-    }
-
-    .upload-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      color: var(--text-tertiary);
-    }
-
-    .upload-area h3 {
-      color: var(--text-primary);
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .upload-area p {
-      color: var(--text-secondary);
-      font-size: 14px;
-      margin-bottom: 16px;
-    }
-
-    .upload-area small {
-      color: var(--text-tertiary);
-      font-size: 12px;
-    }
-
-    .file-input {
-      display: none;
-    }
-
-    .settings-section {
-      background: var(--bg-secondary);
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border-color);
-    }
-
-    .settings-section h4 {
-      color: var(--text-primary);
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-
-    .setting-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .setting-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .setting-label {
-      flex: 1;
-      color: var(--text-secondary);
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .setting-control {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 13px;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-    }
-
-    .button-group {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .btn {
-      flex: 1;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-align: center;
-    }
-
-    .btn-primary {
-      background: var(--primary-color);
-      color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: var(--primary-hover);
-    }
-
-    .btn-primary:disabled {
-      background: var(--text-tertiary);
-      cursor: not-allowed;
-    }
-
-    .btn-secondary {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background: var(--border-color);
-    }
-
-    .status-message {
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin: 16px 0;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .status-info {
-      background: var(--primary-light);
-      color: var(--primary-color);
-      border: 1px solid var(--primary-color);
-    }
-
-    .status-success {
-      background: var(--success-light);
-      color: var(--success-color);
-      border: 1px solid var(--success-color);
-    }
-
-    .status-warning {
-      background: var(--warning-light);
-      color: var(--warning-color);
-      border: 1px solid var(--warning-color);
-    }
-
-    .status-error {
-      background: var(--error-light);
-      color: var(--error-color);
-      border: 1px solid var(--error-color);
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: var(--border-light);
-      border-radius: 4px;
-      overflow: hidden;
-      margin: 12px 0;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--primary-color);
-      transition: width 0.3s ease;
-      width: 0%;
-    }
-
-    .help-section {
-      background: var(--bg-secondary);
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      margin-top: 20px;
-    }
-
-    .help-section h4 {
-      color: var(--text-primary);
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-
-    .help-section p {
-      color: var(--text-secondary);
-      font-size: 13px;
-      margin-bottom: 8px;
-    }
-
-    .help-section ul {
-      color: var(--text-secondary);
-      font-size: 13px;
-      margin-left: 20px;
-    }
-
-    .help-section li {
-      margin-bottom: 4px;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>🔗 LinkedIn Profile Populator</h1>
-      <p>Upload your CSV file with LinkedIn profile data and images</p>
-    </div>
-
-    <div class="upload-area" id="uploadArea">
-      <div class="upload-icon">📊</div>
-      <h3>Upload CSV File</h3>
-      <p>Drop your CSV file here or click to browse</p>
-      <small>CSV should have columns: Name, Designation, Org, LinkedinId, ProfileImage</small>
-      <input type="file" id="fileInput" accept=".csv" class="file-input">
-    </div>
-
-    <div class="settings-section">
-      <h4>⚙️ Processing Settings</h4>
-      
-      <div class="setting-row">
-        <label class="setting-label">Batch Size:</label>
-        <select class="setting-control" id="batchSize">
-          <option value="5">5 profiles</option>
-          <option value="10" selected>10 profiles</option>
-          <option value="20">20 profiles</option>
-          <option value="50">50 profiles</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <label class="setting-label">Image Processing:</label>
-        <select class="setting-control" id="imageProcessing">
-          <option value="original" selected>Original Quality</option>
-          <option value="optimized">Optimized</option>
-          <option value="placeholder">Placeholder Only</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <label class="setting-label">Frame Layout:</label>
-        <select class="setting-control" id="frameLayout">
-          <option value="auto" selected>Auto Layout</option>
-          <option value="horizontal">Horizontal</option>
-          <option value="vertical">Vertical</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="button-group">
-      <button class="btn btn-primary" id="processBtn" disabled>🚀 Process Profiles</button>
-      <button class="btn btn-secondary" id="resetBtn">🔄 Reset</button>
-    </div>
-
-    <div id="statusMessage"></div>
-    <div class="progress-bar" id="progressBar" style="display: none;">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
-
-    <div class="help-section">
-      <h4>📋 How to Use</h4>
-      <p>1. <strong>Prepare your CSV:</strong> Make sure your CSV has columns for Name, Designation, Org, LinkedinId, and ProfileImage</p>
-      <p>2. <strong>Add image URLs:</strong> In the ProfileImage column, add direct URLs to LinkedIn profile pictures</p>
-      <p>3. <strong>Create template frames:</strong> In Figma, create frames with text elements named "Name", "Designation", "Org", and a rectangle named "ProfileImage"</p>
-      <p>4. <strong>Upload and process:</strong> Upload your CSV and click "Process Profiles" to populate your Figma templates</p>
-      
-      <h4 style="margin-top: 16px;">💡 Tips</h4>
-      <ul>
-        <li>Use the manual image collector script to get LinkedIn profile picture URLs</li>
-        <li>Make sure your template frames are named with "template", "profile", "card", or "frame"</li>
-        <li>Text elements should be named "Name", "Designation", or "Org"</li>
-        <li>Image placeholders should be rectangles named "ProfileImage"</li>
-      </ul>
-    </div>
-  </div>
-
-  <script>
-    let selectedFile = null;
-
-    // File upload handling
-    const uploadArea = document.getElementById('uploadArea');
-    const fileInput = document.getElementById('fileInput');
-    const processBtn = document.getElementById('processBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const statusMessage = document.getElementById('statusMessage');
-    const progressBar = document.getElementById('progressBar');
-    const progressFill = document.getElementById('progressFill');
-
-    // Drag and drop
-    uploadArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadArea.classList.add('dragover');
-    });
-
-    uploadArea.addEventListener('dragleave', () => {
-      uploadArea.classList.remove('dragover');
-    });
-
-    uploadArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadArea.classList.remove('dragover');
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        handleFile(files[0]);
-      }
-    });
-
-    // Click to upload
-    uploadArea.addEventListener('click', () => {
-      fileInput.click();
-    });
-
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        handleFile(e.target.files[0]);
-      }
-    });
-
-    function handleFile(file) {
-      if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-        showStatus('Please select a CSV file', 'error');
-        return;
-      }
-
-      selectedFile = file;
-      uploadArea.innerHTML = `
-        <div class="upload-icon">✅</div>
-        <h3>File Selected</h3>
-        <p>${file.name}</p>
-        <small>Ready to process</small>
-      `;
-      
-      processBtn.disabled = false;
-      showStatus('CSV file ready for processing', 'success');
-    }
-
-    // Process button
-    processBtn.addEventListener('click', async () => {
-      if (!selectedFile) return;
-
-      const settings = {
-        batchSize: parseInt(document.getElementById('batchSize').value),
-        imageProcessing: document.getElementById('imageProcessing').value,
-        frameLayout: document.getElementById('frameLayout').value
-      };
-
-      try {
-        const csvData = await readFile(selectedFile);
-        parent.postMessage({
-          pluginMessage: {
-            type: 'process-data',
-            csvData: csvData,
-            settings: settings
-          }
-        }, '*');
+    <div id="app">
+        <h3>📋 LinkedIn Profile Populator</h3>
         
-        showStatus('Processing profiles...', 'info');
-        progressBar.style.display = 'block';
-        processBtn.disabled = true;
-      } catch (error) {
-        showStatus('Error reading file: ' + error.message, 'error');
-      }
-    });
+        <!-- Dual Input Options -->
+        <div class="input-options">
+            
+            <!-- Option 1: Google Sheets Integration -->
+            <div class="input-method">
+                <h4>📊 Option 1: Load from Google Sheets</h4>
+                <div class="input-section">
+                    <label>Google Sheets URL:</label>
+                    <input type="text" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=0" />
+                    <button id="loadSheetsBtn" type="button">Load from Sheets</button>
+                    <small>Make sure your Google Sheet is publicly accessible (anyone with link can view). If you get CORS errors, download the CSV file and upload it instead.</small>
+                </div>
+            </div>
+            
+            <div class="method-divider">
+                <span>OR</span>
+            </div>
+            
+            <!-- Option 2: CSV Upload (Existing) -->
+            <div class="input-method">
+                <h4>📁 Option 2: Upload CSV File</h4>
+                <div class="input-section">
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <input type="file" id="csvFile" accept=".csv" style="display: none;" />
+                        <div class="upload-prompt">
+                            <span class="upload-icon">📄</span>
+                            <p>Drop your CSV file here or click to browse</p>
+                        </div>
+                    </div>
+                    <small>CSV should have columns: Name, Designation, Org, LinkedinId, ProfileImage</small>
+                </div>
+            </div>
+            
+        </div>
 
-    // Reset button
-    resetBtn.addEventListener('click', () => {
-      selectedFile = null;
-      fileInput.value = '';
-      uploadArea.innerHTML = `
-        <div class="upload-icon">📊</div>
-        <h3>Upload CSV File</h3>
-        <p>Drop your CSV file here or click to browse</p>
-        <small>CSV should have columns: Name, Designation, Org, LinkedinId, ProfileImage</small>
-      `;
-      processBtn.disabled = true;
-      progressBar.style.display = 'none';
-      showStatus('', '');
-    });
+        <!-- Data Preview Section -->
+        <div id="dataPreview" class="data-preview" style="display: none;">
+            <h4>📋 Data Preview</h4>
+            <div id="previewContent"></div>
+        </div>
 
-    function readFile(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = (e) => reject(new Error('Failed to read file'));
-        reader.readAsText(file);
-      });
+        <!-- Settings Section -->
+        <div class="settings-section">
+            <details>
+                <summary>⚙️ Processing Settings</summary>
+                <div class="setting-item">
+                    <label>Batch Size:</label>
+                    <select id="batchSize">
+                        <option value="5">5 profiles</option>
+                        <option value="10" selected>10 profiles</option>
+                        <option value="20">20 profiles</option>
+                        <option value="50">50 profiles</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Image Processing:</label>
+                    <select id="imageProcessing">
+                        <option value="original" selected>Original Quality</option>
+                        <option value="optimized">Optimized</option>
+                        <option value="compressed">Compressed</option>
+                    </select>
+                </div>
+            </details>
+        </div>
+
+        <!-- Process Button -->
+        <button id="processBtn" disabled>Generate Profile Cards</button>
+        
+        <!-- Status Display -->
+        <div id="status"></div>
+        
+        <!-- Progress Bar -->
+        <div id="progressContainer" style="display: none;">
+            <div class="progress-bar">
+                <div id="progressBar" class="progress-fill"></div>
+            </div>
+            <div id="progressText">Processing...</div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <h4>📖 Quick Guide</h4>
+            <ol>
+                <li><strong>Prepare your data:</strong> Make sure your CSV/Sheet has columns for Name, Designation, Org, LinkedinId, and ProfileImage</li>
+                <li><strong>Add image URLs:</strong> In the ProfileImage column, add direct URLs to LinkedIn profile pictures</li>
+                <li><strong>Create template frames:</strong> In Figma, create frames with text elements named "Name", "Designation", "Org", and a rectangle named "ProfileImage"</li>
+                <li><strong>Upload and process:</strong> Load your data and click "Generate Profile Cards" to populate your Figma templates</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Event listeners
+        document.getElementById('loadSheetsBtn').addEventListener('click', loadGoogleSheets);
+        document.getElementById('csvFile').addEventListener('change', handleFile);
+        document.getElementById('processBtn').addEventListener('click', processData);
+        
+        // File upload area events
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('csvFile');
+        
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        // Global variables
+        let csvData = null;
+        let dataSource = null;
+
+        // Google Sheets loader function
+        async function loadGoogleSheets() {
+            const url = document.getElementById('sheetsUrl').value.trim();
+            
+            if (!url) {
+                updateStatus('Please enter a Google Sheets URL', 'error');
+                return;
+            }
+            
+            if (!isValidGoogleSheetsUrl(url)) {
+                updateStatus('Please enter a valid Google Sheets URL (must contain docs.google.com/spreadsheets)', 'error');
+                return;
+            }
+            
+            try {
+                updateStatus('🔄 Loading data from Google Sheets...', 'loading');
+                
+                const csvUrl = convertToCSVUrl(url);
+                console.log('Fetching CSV from:', csvUrl);
+                
+                // Use CORS proxy to avoid CORS issues
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`;
+                console.log('Using proxy URL:', proxyUrl);
+                
+                const response = await fetch(proxyUrl);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch data (${response.status}). Make sure the sheet is publicly accessible.`);
+                }
+                
+                const csvText = await response.text();
+                
+                if (!csvText || csvText.includes('<!DOCTYPE html>') || csvText.includes('<html')) {
+                    throw new Error('Could not access sheet data. Please check that the sheet is public and the URL is correct.');
+                }
+                
+                csvData = csvText;
+                dataSource = 'google-sheets';
+                
+                const profileCount = (csvText.split('\n').length - 1);
+                updateStatus(`✅ Successfully loaded ${profileCount} profiles from Google Sheets`, 'success');
+                showDataPreview(csvText, 'Google Sheets');
+                document.getElementById('processBtn').disabled = false;
+                
+                // Clear file input
+                document.getElementById('csvFile').value = '';
+                
+            } catch (error) {
+                console.error('Google Sheets error:', error);
+                updateStatus(`❌ Google Sheets Error: ${error.message}. Try downloading the CSV file and uploading it instead.`, 'error');
+                csvData = null;
+                dataSource = null;
+                hideDataPreview();
+                document.getElementById('processBtn').disabled = true;
+            }
+        }
+
+        // Validate Google Sheets URL
+        function isValidGoogleSheetsUrl(url) {
+            return url.includes('docs.google.com/spreadsheets/d/') && 
+                   url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+        }
+
+        // Convert Google Sheets URL to CSV export URL
+        function convertToCSVUrl(url) {
+            let sheetId, gid = '0';
+            
+            const sheetIdMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            if (sheetIdMatch) {
+                sheetId = sheetIdMatch[1];
+            } else {
+                throw new Error('Could not extract sheet ID from URL');
+            }
+            
+            const gidMatch = url.match(/[#&]gid=([0-9]+)/);
+            if (gidMatch) {
+                gid = gidMatch[1];
+            }
+            
+            return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+        }
+
+        // File upload handler
+        function handleFile(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileUpload(file);
+            }
+        }
+
+        function handleFileUpload(file) {
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                updateStatus('❌ Please select a CSV file', 'error');
+                return;
+            }
+            
+            updateStatus('🔄 Processing uploaded CSV file...', 'loading');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    csvData = e.target.result;
+                    dataSource = 'csv-upload';
+                    
+                    const profileCount = (csvData.split('\n').length - 1);
+                    updateStatus(`✅ Successfully loaded ${profileCount} profiles from CSV file`, 'success');
+                    showDataPreview(csvData, 'CSV File');
+                    document.getElementById('processBtn').disabled = false;
+                    
+                    // Clear sheets input
+                    document.getElementById('sheetsUrl').value = '';
+                    
+                } catch (error) {
+                    updateStatus(`❌ CSV Error: ${error.message}`, 'error');
+                    csvData = null;
+                    dataSource = null;
+                    hideDataPreview();
+                    document.getElementById('processBtn').disabled = true;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Show data preview
+        function showDataPreview(csvText, source) {
+            const lines = csvText.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const dataRows = lines.slice(1, 4); // Show first 3 rows
+            
+            const preview = document.getElementById('dataPreview');
+            const content = document.getElementById('previewContent');
+            
+            let html = `<div class="preview-header">
+                <span class="preview-source">Source: ${source}</span>
+                <span class="preview-count">${lines.length - 1} profiles loaded</span>
+            </div>`;
+            
+            if (dataRows.length > 0) {
+                html += '<div class="preview-table"><table>';
+                html += '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+                
+                dataRows.forEach(row => {
+                    const values = row.split(',').map(v => v.trim().replace(/"/g, ''));
+                    html += '<tr>' + values.map(v => `<td>${(v || '').substring(0, 25)}${v && v.length > 25 ? '...' : ''}</td>`).join('') + '</tr>';
+                });
+                
+                html += '</table></div>';
+                
+                if (lines.length > 4) {
+                    html += `<div class="preview-more">... and ${lines.length - 4} more profiles</div>`;
+                }
+            }
+            
+            content.innerHTML = html;
+            preview.style.display = 'block';
+        }
+
+        // Hide data preview
+        function hideDataPreview() {
+            document.getElementById('dataPreview').style.display = 'none';
+        }
+
+        // Process data
+        function processData() {
+            if (!csvData) {
+                updateStatus('❌ No data to process. Please load data from Google Sheets or upload a CSV file.', 'error');
+                return;
+            }
+
+            const settings = {
+                batchSize: parseInt(document.getElementById('batchSize').value),
+                imageProcessing: document.getElementById('imageProcessing').value,
+                frameLayout: 'auto'
+            };
+
+            updateStatus(`🚀 Processing profiles from ${dataSource === 'google-sheets' ? 'Google Sheets' : 'CSV file'}...`, 'loading');
+            showProgress(0, 1);
+
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'process-data',
+                    csvData: csvData,
+                    settings: settings,
+                    source: dataSource
+                }
+            }, '*');
+        }
+
+        // Show progress
+        function showProgress(current, total) {
+            const container = document.getElementById('progressContainer');
+            const bar = document.getElementById('progressBar');
+            const text = document.getElementById('progressText');
+            
+            container.style.display = 'block';
+            const percentage = Math.round((current / total) * 100);
+            bar.style.width = `${percentage}%`;
+            text.textContent = `Processing ${current} of ${total} profiles...`;
+        }
+
+        // Hide progress
+        function hideProgress() {
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+
+        // Update status
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (status.textContent === message) {
+                        status.textContent = '';
+                        status.className = 'status';
+                    }
+                }, 4000);
+            }
+        }
+
+        // Listen for messages from plugin code
+        window.addEventListener('message', (event) => {
+            if (event.data.pluginMessage) {
+                const msg = event.data.pluginMessage;
+                
+                switch (msg.type) {
+                    case 'status':
+                        updateStatus(msg.message, 'loading');
+                        break;
+                    case 'progress':
+                        showProgress(msg.current, msg.total);
+                        break;
+                    case 'complete':
+                        updateStatus(`✅ ${msg.message}`, 'success');
+                        hideProgress();
+                        break;
+                    case 'error':
+                        updateStatus(`❌ Error: ${msg.message}`, 'error');
+                        hideProgress();
+                        break;
+                }
+            }
+        });
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+      padding: 16px;
+            background: #f8f9fd;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        #app {
+            max-width: 460px;
+        }
+
+        h3 {
+            margin: 0 0 24px 0;
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        h4 {
+            margin: 0 0 12px 0;
+            color: #333;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .input-options {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+      overflow: hidden;
+        }
+
+        .input-method {
+            padding: 20px;
+        }
+
+        .input-method:first-child {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .method-divider {
+            text-align: center;
+            padding: 12px 0;
+            background: #f8f9fa;
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 13px;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .input-section {
+            margin: 12px 0 0 0;
+        }
+
+        .input-section label {
+      display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .input-section small {
+            display: block;
+            color: #6c757d;
+            font-size: 12px;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #0d99ff;
+            box-shadow: 0 0 0 3px rgba(13, 153, 255, 0.1);
+        }
+
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f9fafb;
+        }
+
+        .file-upload-area:hover {
+            border-color: #0d99ff;
+            background: #f0f8ff;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #0d99ff;
+            background: #e6f3ff;
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .upload-prompt p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        button {
+            background: #0d99ff;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #0084e6;
+      transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 153, 255, 0.3);
+        }
+
+        button:disabled {
+            background: #e9ecef;
+            color: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
-    function showStatus(message, type) {
-      if (!message) {
-        statusMessage.innerHTML = '';
-        return;
-      }
-      
-      statusMessage.innerHTML = `<div class="status-${type}">${message}</div>`;
-    }
+        #loadSheetsBtn {
+            margin-top: 10px;
+            width: auto;
+            min-width: 140px;
+        }
 
-    // Listen for messages from the plugin
-    window.onmessage = (event) => {
-      const msg = event.data.pluginMessage;
-      if (!msg) return;
+        #processBtn {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #0d99ff 0%, #0084e6 100%);
+            margin: 16px 0;
+        }
 
-      switch (msg.type) {
-        case 'status':
-          showStatus(msg.message, 'info');
-          break;
-        case 'progress':
-          const percentage = (msg.current / msg.total) * 100;
-          progressFill.style.width = percentage + '%';
-          showStatus(`Processing ${msg.current} of ${msg.total} profiles...`, 'info');
-          break;
-        case 'complete':
-          showStatus(msg.message, 'success');
-          progressBar.style.display = 'none';
-          processBtn.disabled = false;
-          break;
-        case 'error':
-          showStatus(msg.message, 'error');
-          progressBar.style.display = 'none';
-          processBtn.disabled = false;
-          break;
-      }
-    };
-  </script>
+        /* Data Preview */
+        .data-preview {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .preview-source {
+            font-weight: 500;
+            color: #0d99ff;
+        }
+
+        .preview-count {
+            font-size: 13px;
+            color: #6c757d;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .preview-table {
+            overflow-x: auto;
+        }
+
+        .preview-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .preview-table th {
+            background: #f8f9fa;
+            padding: 8px 6px;
+            text-align: left;
+            font-weight: 500;
+            color: #495057;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .preview-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        .preview-more {
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 8px;
+        }
+
+        /* Settings */
+        .settings-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 16px;
+            padding: 16px;
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: 500;
+            color: #333;
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details summary::before {
+            content: '▶';
+            margin-right: 8px;
+            transition: transform 0.2s;
+        }
+
+        details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .setting-item {
+            margin: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        select {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+        }
+
+        /* Progress */
+        #progressContainer {
+            margin: 16px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0d99ff, #00d4aa);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        #progressText {
+            font-size: 13px;
+            color: #6c757d;
+            text-align: center;
+        }
+
+        /* Status */
+        .status {
+            margin: 16px 0;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d1f2eb;
+            color: #0d5e3a;
+            border: 1px solid #7dda9b;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f1aeb5;
+        }
+
+        .status.loading {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #99d3ff;
+        }
+
+        /* Instructions */
+        .instructions {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #0d99ff;
+        }
+
+        .instructions ol {
+            margin: 8px 0 0 16px;
+            padding: 0;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+            color: #495057;
+        }
+
+        .instructions strong {
+            color: #212529;
+        }
+    </style>
 </body>
 </html>
